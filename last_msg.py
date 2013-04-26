@@ -9,6 +9,7 @@
 import urllib.request
 import urllib.parse
 import json
+import time
 
 # some private const (no push to public repo)
 import private
@@ -17,17 +18,37 @@ TD12XX_KEY = private.TD12XX_KEY
 
 # get token
 token_params = urllib.parse.urlencode({'sn': TD12XX_ID, 'key': TD12XX_KEY})
-f = urllib.request.urlopen("http://sensor.insgroup.fr/iot/devices/crc.json?%s" % token_params)
-token = f.read().decode('utf-8')
+try:
+  f = urllib.request.urlopen("https://sensor.insgroup.fr/iot/devices/crc.json?%s" % token_params)
+except:
+  print("get_token: error, exit.")
+  exit(1);
+# read and check token
+token    = f.read()
+print("token (base64)  : %s" % token.decode('ascii'))
 
-# get messages history (last 3)
-msg_params = urllib.parse.urlencode({'sn': TD12XX_ID, 'amount': 3})
-req = urllib.request.Request("https://sensor.insgroup.fr/iot/devices/msgs/history.json?%s" % msg_params)
-req.add_header('X-Snsr-Device-Key', token)
-f = urllib.request.urlopen(req)
-msg_json = f.read().decode('utf-8')
-msgs = json.loads(msg_json)
+# get messages history in json format (last 3)
+msg_params = urllib.parse.urlencode({'sn': TD12XX_ID, 'amount': 30})
+try:
+  req = urllib.request.Request("https://sensor.insgroup.fr/iot/devices/msgs/history.json?%s" % msg_params)
+  req.add_header('X-Snsr-Device-Key', token)
+  f = urllib.request.urlopen(req)
+except:
+  print("get_msg: error, exit.")
+  exit(2)
+msg_json = f.read()
+
+# decode json
+msgs = json.loads(msg_json.decode('ascii'))
 for msg in msgs:
-  print(msg)
-  print("\n")
-
+  # format json var
+  try:
+    msg_when = msg['when']/1000
+  except:
+    msg_when = 0;
+  try:
+    msg_type = msg['type']
+  except:
+    msg_type = 'unknown'
+  # print history
+  print('{0} {1}'.format(time.strftime("%d/%m/%Y %H:%M", time.localtime(int(msg_when))), msg_type))
