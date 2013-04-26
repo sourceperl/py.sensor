@@ -21,7 +21,7 @@ token_params = urllib.parse.urlencode({'sn': TD12XX_ID, 'key': TD12XX_KEY})
 try:
   f = urllib.request.urlopen("https://sensor.insgroup.fr/iot/devices/crc.json?%s" % token_params)
 except:
-  print("get_token: error, exit.")
+  print('get_token: error, exit.')
   exit(1);
 # read and check token
 token    = f.read()
@@ -34,7 +34,7 @@ try:
   req.add_header('X-Snsr-Device-Key', token)
   f = urllib.request.urlopen(req)
 except:
-  print("get_msg: error, exit.")
+  print('get_msg: error, exit.')
   exit(2)
 msg_json = f.read()
 
