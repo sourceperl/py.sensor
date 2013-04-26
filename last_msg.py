@@ -28,7 +28,7 @@ token    = f.read()
 print("token (base64)  : %s" % token.decode('ascii'))
 
 # get messages history in json format (last 3)
-msg_params = urllib.parse.urlencode({'sn': TD12XX_ID, 'amount': 30})
+msg_params = urllib.parse.urlencode({'sn': TD12XX_ID, 'amount': 20})
 try:
   req = urllib.request.Request("https://sensor.insgroup.fr/iot/devices/msgs/history.json?%s" % msg_params)
   req.add_header('X-Snsr-Device-Key', token)
@@ -50,5 +50,13 @@ for msg in msgs:
     msg_type = msg['type']
   except:
     msg_type = 'unknown'
+  try:
+    msg_station = msg['station']
+  except:
+    msg_station = 'null'
+  try:
+    msg_lvl = round(float(msg['lvl']))
+  except:
+    msg_lvl = 'null'
   # print history
-  print('{0} {1}'.format(time.strftime("%d/%m/%Y %H:%M", time.localtime(int(msg_when))), msg_type))
+  print('{0} {1:15s} {2} {3:02d}'.format(time.strftime("%d/%m/%Y %H:%M", time.localtime(int(msg_when))), msg_type, msg_station, msg_lvl))
