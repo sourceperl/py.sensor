@@ -1,3 +1,6 @@
+"sensor.py" : Sensor Python3 class for exchange with TD platform
+"test.py"   : Test script for "sensor.py"
+
 You must create a file "private.py" in same directory as scripts before using it.
 
 You must include 2 strings in this file:
