@@ -40,7 +40,7 @@ class Sensor:
 
   def get_history(self, amount = 20, until = 0):
     """
-    Get messages history in json format
+    Get messages history
       return an array of message if success
       return 0 if fail
     """
@@ -60,7 +60,32 @@ class Sensor:
     msg_json = f.read()
     msgs = json.loads(msg_json.decode('ascii'))
     return msgs
+
+  def get_information(self):
+    """
+    Get device information
+      return an array of message if success
+      return 0 if fail
+    """
+    params = {'sn': self.device_id}
+    msg_params = urllib.parse.urlencode(params)
+    try:
+      req = urllib.request.Request("https://sensor.insgroup.fr/iot/devices/children.json?%s" % msg_params)
+      req.add_header('X-Snsr-Device-Key', self.token)
+      f = urllib.request.urlopen(req)
+    except urllib.error.HTTPError as err:
+      self.lastHTTPError = err.code
+      return 0
+    except:
+      return 0
+    msg_json = f.read()
+    msgs = json.loads(msg_json.decode('ascii'))
+    return msgs
   
+  def print_token(self):
+    """Display token on stdout"""
+    print("token (base64)  : %s" % self.token.decode('ascii'))
+
   def _update_token(self):
     """
     Get the token for current device id/key
@@ -78,6 +103,3 @@ class Sensor:
     # read and check token
     self.token = f.read()
     return 1
-
-  def print_token(self):
-    print("token (base64)  : %s" % self.token.decode('ascii'))
