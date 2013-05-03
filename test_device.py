@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 #
-# test script for sensor module
+# test script for sensor module : Device class
 #
 # code under GPLv2
 
@@ -11,18 +11,18 @@ import time
 
 # some private const (no push to public repo)
 import private
-TD12XX_ID  = private.TD12XX_ID
-TD12XX_KEY = private.TD12XX_KEY
+TD12XX_ID      = private.TD12XX_ID
+TD12XX_KEY     = private.TD12XX_KEY
 
 # use sensor object
-sensor = sensor.Sensor()
+device = sensor.Device()
 # get token
-if (not sensor.set_device(TD12XX_ID, TD12XX_KEY)):
+if (not device.set_device(TD12XX_ID, TD12XX_KEY)):
   print('get token ko !')
   exit(1)
 
 # get message history
-msgs = sensor.get_history(20)
+msgs = device.get_history(20)
 # skip if error
 if msgs == 0:
   exit(2)

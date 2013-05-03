@@ -11,14 +11,84 @@ import urllib.request
 import urllib.parse
 import json
 
-class Sensor:
+class Developer:
   """
   Python module for interface with Telecom Design Sensor Web services
+  Developer class
 
   usage sample:
-    sensor = Sensor()
-    sensor.set_device(your_id, your_key)
-    msgs = sensor.get_last_msgs(30)
+    devel = Developer()
+    devel.login(login, password)
+  """
+
+  def __init__(self):
+    """Class builder"""
+    self.auth_token    = ''
+    self.auth_login    = ''
+    self.auth_pwd      = ''
+    self.lastHTTPError = 0
+  
+  def login(self, dev_login, dev_password):
+    """
+    Login to developer account
+      return 1 if success
+      return 0 if fail
+    """
+    self.auth_login = dev_login
+    self.auth_pwd   = dev_password
+    return self._auth()
+
+  def app_list(self):
+    """
+    Get app list for this developer account
+      return an array of app if success
+      return 0 if fail
+    """
+    try:
+      req = urllib.request.Request("https://sensor.insgroup.fr/iot/developers/apps.json")
+      # don't work if white space after 'Basic' is remove
+      req.add_header('Authorization: Basic ', self.auth_token)
+      f = urllib.request.urlopen(req)
+    except urllib.error.HTTPError as err:
+      self.lastHTTPError = err.code
+      return 0
+    except:
+      return 0
+    app_json = f.read()
+    apps = json.loads(app_json.decode('ascii'))
+    return apps
+
+  def print_token(self):
+    """Display token on stdout"""
+    print("token (base64)  : %s" % self.auth_token.decode('ascii'))
+  
+  def _auth(self):
+    """
+    Get the auth token for current developer account
+      return 1 if success
+      return 0 if fail
+    """
+    auth_params = urllib.parse.urlencode({'login': self.auth_login, 'pwd': self.auth_pwd})
+    try:
+      f = urllib.request.urlopen("https://sensor.insgroup.fr/security/authentication?%s" % auth_params)
+    except urllib.error.HTTPError as err:
+      self.lastHTTPError = err.code
+      return 0
+    except:
+      return 0
+    # read and check token
+    self.auth_token = f.read()
+    return 1
+
+class Device:
+  """
+  Python module for interface with Telecom Design Sensor Web services
+  Device class
+
+  usage sample:
+    device = Device()
+    device.set_device(your_id, your_key)
+    msgs = device.get_last_msgs(30)
   """
 
   def __init__(self):
