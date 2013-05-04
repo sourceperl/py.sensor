@@ -1,4 +1,4 @@
-"sensor.py" : Developper and Device Python3 class for exchange with TD platform
+"sensor.py" : Developer and Device Python3 class for exchange with TD platform
 "test.py"   : Test script for "sensor.py"
 
 You must create a file "private.py" in same directory as scripts before using it.
