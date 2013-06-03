@@ -28,5 +28,16 @@ if apps == 0:
   print('retrieve apps ko !')
   exit(2)
 
+print('retrieve apps :')
 print(apps)
+
+# get message history
+mods = devel.mod_list()
+# skip if error
+if mods == 0:
+  print('retrieve modules ko !')
+  exit(2)
+
+print('retrieve modules :')
+print(mods)
 exit(0)
