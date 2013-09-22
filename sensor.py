@@ -58,6 +58,28 @@ class Developer:
     apps = json.loads(app_json.decode('ascii'))
     return apps
   
+  def mod_register(self, mod_serial, mod_key):
+    """
+    Attach a single or multiple module(s) to the developer's account
+      return an array of modules if success
+      return 0 if fail
+    """
+    try:
+      req = urllib.request.Request("https://sensor.insgroup.fr/iot/developers/modules.json")
+      # don't work if white space after 'Basic' is remove
+      req.add_header('Authorization: Basic ', self.auth_token)
+      req.add_header('Content-Type', 'application/x-www-form-urlencoded')
+      post_params = "[{\"serial\": \"" + str(mod_serial) + "\", \"key\": \"" + str(mod_key) + "\"}]"
+      f = urllib.request.urlopen(req, post_params.encode('ascii'))
+    except urllib.error.HTTPError as err:
+      self.lastHTTPError = err.code
+      return 0
+    except:
+      return 0
+    mod_json = f.read()
+    mods = json.loads(mod_json.decode('ascii'))
+    return mods
+
   def mod_list(self):
     """
     Get modules list for this developer account
