@@ -1,15 +1,19 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 
 # 
 # Python class for interface with Telecom Design Sensor platform
+# Test with Python2.7 and Python3
 #
-#
+# Think to add request to your Python install
+# on debian like : 
+# $ sudo apt-get install python-requests python3-requests
+# you can also use pip :
+# $ sudo pip install requests
+# 
 # code under GPLv2
 
 # some libs
-import urllib.request
-import urllib.parse
-import json
+import requests
 
 class Developer:
   """
@@ -44,19 +48,14 @@ class Developer:
       return an array of app if success
       return 0 if fail
     """
-    try:
-      req = urllib.request.Request("https://sensor.insgroup.fr/iot/developers/apps.json")
-      # don't work if white space after 'Basic' is remove
-      req.add_header('Authorization: Basic ', self.auth_token)
-      f = urllib.request.urlopen(req)
-    except urllib.error.HTTPError as err:
-      self.lastHTTPError = err.code
+    headers = {'Authorization: Basic ': self.auth_token}
+    r = requests.get("https://sensor.insgroup.fr/iot/developers/apps.json", 
+                     headers=headers, )
+    # check error status
+    if(r.status_code != requests.codes.ok):
       return 0
-    except:
-      return 0
-    app_json = f.read()
-    apps = json.loads(app_json.decode('ascii'))
-    return apps
+    # return decode JSON string
+    return r.json()
   
   def mod_register(self, mod_serial, mod_key):
     """
@@ -64,21 +63,18 @@ class Developer:
       return an array of modules if success
       return 0 if fail
     """
-    try:
-      req = urllib.request.Request("https://sensor.insgroup.fr/iot/developers/modules.json")
-      # don't work if white space after 'Basic' is remove
-      req.add_header('Authorization: Basic ', self.auth_token)
-      req.add_header('Content-Type', 'application/x-www-form-urlencoded')
-      post_params = "[{\"serial\": \"" + str(mod_serial) + "\", \"key\": \"" + str(mod_key) + "\"}]"
-      f = urllib.request.urlopen(req, post_params.encode('ascii'))
-    except urllib.error.HTTPError as err:
-      self.lastHTTPError = err.code
+    headers = {'Authorization: Basic ': self.auth_token,
+               'Content-Type': 'application/x-www-form-urlencoded'}
+    params = {'serial': str(mod_serial), 'key': str(mode_key)}
+#    params = "[{\"serial\": \"" + str(mod_serial) + 
+#             "\", \"key\": \"" + str(mod_key) + "\"}]"
+    r = requests.post("https://sensor.insgroup.fr/iot/developers/modules.json",
+                      params=params, headers=headers)
+    # check error status
+    if(r.status_code != requests.codes.ok):
       return 0
-    except:
-      return 0
-    mod_json = f.read()
-    mods = json.loads(mod_json.decode('ascii'))
-    return mods
+    # return decode JSON string
+    return r.json()
 
   def mod_list(self):
     """
@@ -86,19 +82,14 @@ class Developer:
       return an array of modules if success
       return 0 if fail
     """
-    try:
-      req = urllib.request.Request("https://sensor.insgroup.fr/iot/developers/modules.json")
-      # don't work if white space after 'Basic' is remove
-      req.add_header('Authorization: Basic ', self.auth_token)
-      f = urllib.request.urlopen(req)
-    except urllib.error.HTTPError as err:
-      self.lastHTTPError = err.code
+    headers = {'Authorization: Basic ': self.auth_token}
+    r = requests.get("https://sensor.insgroup.fr/iot/developers/modules.json",
+                     headers=headers)
+    # check error status
+    if(r.status_code != requests.codes.ok):
       return 0
-    except:
-      return 0
-    mod_json = f.read()
-    mods = json.loads(mod_json.decode('ascii'))
-    return mods
+    # return decode JSON string
+    return r.json()
 
   def print_token(self):
     """Display token on stdout"""
@@ -110,16 +101,14 @@ class Developer:
       return 1 if success
       return 0 if fail
     """
-    auth_params = urllib.parse.urlencode({'login': self.auth_login, 'pwd': self.auth_pwd})
-    try:
-      f = urllib.request.urlopen("https://sensor.insgroup.fr/security/authentication?%s" % auth_params)
-    except urllib.error.HTTPError as err:
-      self.lastHTTPError = err.code
-      return 0
-    except:
+    params = {'login': self.auth_login, 'pwd': self.auth_pwd}
+    r = requests.get("https://sensor.insgroup.fr/security/authentication",
+                     params=params)
+    # check error status
+    if(r.status_code != requests.codes.ok):
       return 0
     # read and check token
-    self.auth_token = f.read()
+    self.auth_token = r.text
     return 1
 
 class Device:
@@ -156,22 +145,18 @@ class Device:
       return an array of message if success
       return 0 if fail
     """
+    # make request
     params = {'sn': self.device_id, 'amount': amount}
     if (until > 0):
       params['until'] = until
-    msg_params = urllib.parse.urlencode(params)
-    try:
-      req = urllib.request.Request("https://sensor.insgroup.fr/iot/devices/msgs/history.json?%s" % msg_params)
-      req.add_header('X-Snsr-Device-Key', self.token)
-      f = urllib.request.urlopen(req)
-    except urllib.error.HTTPError as err:
-      self.lastHTTPError = err.code
+    headers = {'X-Snsr-Device-Key': self.token}
+    r = requests.get("https://sensor.insgroup.fr/iot/devices/msgs/history.json", 
+                     params=params, headers=headers)
+    # check error status
+    if(r.status_code != requests.codes.ok):
       return 0
-    except:
-      return 0
-    msg_json = f.read()
-    msgs = json.loads(msg_json.decode('ascii'))
-    return msgs
+    # return decode JSON string
+    return r.json()
 
   def get_information(self):
     """
@@ -179,20 +164,16 @@ class Device:
       return an array of message if success
       return 0 if fail
     """
+    # make request
     params = {'sn': self.device_id}
-    msg_params = urllib.parse.urlencode(params)
-    try:
-      req = urllib.request.Request("https://sensor.insgroup.fr/iot/devices/children.json?%s" % msg_params)
-      req.add_header('X-Snsr-Device-Key', self.token)
-      f = urllib.request.urlopen(req)
-    except urllib.error.HTTPError as err:
-      self.lastHTTPError = err.code
+    headers = {'X-Snsr-Device-Key': self.token}
+    r = requests.get("https://sensor.insgroup.fr/iot/devices/children.json", 
+                 params=params, headers=headers)
+    # check error status
+    if(r.status_code != requests.codes.ok):
       return 0
-    except:
-      return 0
-    msg_json = f.read()
-    msgs = json.loads(msg_json.decode('ascii'))
-    return msgs
+    # return decode JSON string
+    return r.json()
   
   def print_token(self):
     """Display token on stdout"""
@@ -204,14 +185,13 @@ class Device:
       return 1 if success
       return 0 if fail
     """
-    token_params = urllib.parse.urlencode({'sn': self.device_id, 'key': self.device_key})
-    try:
-      f = urllib.request.urlopen("https://sensor.insgroup.fr/iot/devices/crc.json?%s" % token_params)
-    except urllib.error.HTTPError as err:
-      self.lastHTTPError = err.code
-      return 0
-    except:
+    # make request
+    params = {'sn': self.device_id, 'key': self.device_key}
+    r = requests.get("https://sensor.insgroup.fr/iot/devices/crc.json", 
+                     params=params)
+    # check error status
+    if(r.status_code != requests.codes.ok):
       return 0
     # read and check token
-    self.token = f.read()
+    self.token = r.text
     return 1

@@ -31,7 +31,7 @@ if msgs == 0:
 print('{0:16s}  {1:15s}  {2:20s}  {3:4s}  {4:2s}'.format('date-time', 'msg-type', 'payload', 'stat', 'lv'))
 
 for msg in msgs:
-  # test and format vars from JSON
+  # test and format vars from JSON
   try:
     msg_when = msg['when']/1000
   except:
@@ -45,7 +45,7 @@ for msg in msgs:
   except:
     msg_station = 'null'
   try:
-    msg_lvl = round(float(msg['lvl']))
+    msg_lvl = int(round(float(msg['lvl'])))
   except:
     msg_lvl = 'null'
   try:
